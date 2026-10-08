@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الشرف | BRT Tracker</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --bg-color: #f3f6f8; --surface: #ffffff; --primary: #f97316; --text-main: #1e293b; --text-light: #64748b; --border: #e2e8f0; --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; }
+        [data-theme="dark"] { --bg-color: #0f172a; --surface: #1e293b; --text-main: #f8fafc; --text-light: #94a3b8; --border: #334155; }
+        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 20px 10px; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .app-container { background: var(--surface); width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); padding: 25px 20px; animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--primary); }
+        .header p { margin: 5px 0 0; font-size: 14px; color: var(--text-light); }
+        .nav-btn { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--text-main); text-decoration: none; font-weight: 700; background: var(--bg-color); padding: 8px 15px; border-radius: 12px; transition: all 0.3s ease; border: 1px solid var(--border); }
+        .nav-btn:hover { color: var(--primary); border-color: var(--primary); }
+        .leaderboard-list { list-style: none; padding: 0; margin: 0; }
+        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: var(--bg-color); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); transition: transform 0.2s; }
+        .leader-item:hover { transform: translateX(-5px); border-color: var(--primary); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .rank { font-size: 20px; font-weight: 800; width: 30px; text-align: center; color: var(--text-light); }
+        .name { font-size: 16px; font-weight: 700; }
+        .score { background: var(--primary); color: white; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+        .loading { text-align: center; padding: 30px; color: var(--text-light); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="nav-btn"><i class="fa-solid fa-arrow-right"></i> رجوع للخريطة</a>
+
+    <div class="app-container">
+        <div class="header">
+            <h1><i class="fa-solid fa-trophy"></i> لوحة الشرف</h1>
+            <p>أكثر المتطوعين مساهمة في رسم مسار الـ BRT</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+            <p>جاري تجميع البيانات المعتمدة...</p>
+        </div>
+
+        <ul class="leaderboard-list" id="leaderboardList"></ul>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvLh2xaY82KPf532i4ME__at-jFn2xpZU",
+            authDomain: "brt-egypt.firebaseapp.com",
+            projectId: "brt-egypt",
+            storageBucket: "brt-egypt.firebasestorage.app",
+            messagingSenderId: "956464108001",
+            appId: "1:956464108001:web:f70ba23bccb8070fa702a0",
+            measurementId: "G-7X07B0Q6HE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchLeaderboard() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "verified_stations"));
+                const contributorsData = {}; // هنجمع هنا الداتا بالبصمة السرية
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    let name = data.contributor;
+                    let deviceId = data.deviceId || name; // لو داتا قديمة مفيهاش بصمة، استخدم الاسم مؤقتاً
+
+                    if (!name || name === "User" || name.trim() === "") name = "مساهم مجهول";
+
+                    // لو البصمة دي أول مرة تظهر، اعملها بروفايل
+                    if (!contributorsData[deviceId]) {
+                        contributorsData[deviceId] = { name: name, count: 0 };
+                    }
+                    
+                    // لو سجل اسم أحدث وواضح، حدثه
+                    if (name !== "مساهم مجهول") {
+                        contributorsData[deviceId].name = name;
+                    }
+                    
+                    contributorsData[deviceId].count += 1;
+                });
+
+                // تحويل للـ Array وترتيبهم من الأكتر للأقل
+                const sortedLeaders = Object.values(contributorsData).sort((a, b) => b.count - a.count);
+
+                const listElement = document.getElementById('leaderboardList');
+                document.getElementById('loading').style.display = 'none';
+
+                if (sortedLeaders.length === 0) {
+                    listElement.innerHTML = `<p style="text-align:center; color: var(--text-light);">لا توجد محطات معتمدة حتى الآن.</p>`;
+                    return;
+                }
+
+                sortedLeaders.forEach((leader, index) => {
+                    let rankIcon = `#${index + 1}`;
+                    if (index === 0) rankIcon = `<i class="fa-solid fa-medal" style="color: var(--gold); font-size: 24px;"></i>`;
+                    if (index === 1) rankIcon = `<i class="fa-solid fa-medal" style="color: var(--silver); font-size: 24px;"></i>`;
+                    if (index === 2) rankIcon = `<i class="fa-solid fa-medal" style="color: var(--bronze); font-size: 24px;"></i>`;
+
+                    const li = document.createElement('li');
+                    li.className = 'leader-item';
+                    li.innerHTML = `
+                        <div class="user-info">
+                            <div class="rank">${rankIcon}</div>
+                            <div class="name">${leader.name}</div>
+                        </div>
+                        <div class="score">${leader.count} محطة</div>
+                    `;
+                    listElement.appendChild(li);
+                });
+
+            } catch (error) {
+                document.getElementById('loading').innerHTML = `<p style="color:#ef4444;">حدث خطأ أثناء جلب البيانات</p>`;
+            }
+        }
+
+        fetchLeaderboard();
+    </script>
+</body>
+</html>

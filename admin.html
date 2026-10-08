@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم BRT | Admin</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --bg-color: #f1f5f9; --surface: #ffffff; --primary: #f97316; 
+            --text-main: #1e293b; --text-light: #64748b; --border: #e2e8f0; 
+            --success: #10b981; --danger: #ef4444; --dark: #0f172a; --info: #3b82f6; 
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] { 
+            --bg-color: #0f172a; --surface: #1e293b; --text-main: #f8fafc; 
+            --text-light: #94a3b8; --border: #334155; --dark: #cbd5e1;
+            --input-bg: #0f172a;
+        }
+
+        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+        
+        #loginSection { margin-top: 10vh; background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 90%; max-width: 400px; text-align: center; transition: background 0.3s; }
+        #loginSection h2 { margin: 0 0 20px 0; color: var(--text-main); font-weight: 800; }
+        
+        .input-field { width: 100%; box-sizing: border-box; padding: 15px; margin-bottom: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Cairo', sans-serif; font-size: 15px; background: var(--input-bg); color: var(--text-main); transition: 0.3s; }
+        .input-field:focus { outline: none; border-color: var(--primary); }
+        
+        .btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #ea580c; }
+        
+        #dashboardSection { display: none; width: 95%; max-width: 1200px; margin-top: 30px; margin-bottom: 50px; }
+        
+        .dash-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 20px 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; flex-wrap: wrap; gap: 15px; transition: background 0.3s; }
+        .action-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        .btn-action { padding: 10px 15px; border: none; border-radius: 8px; color: white; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-theme { background: #64748b; } .btn-theme:hover { background: #475569; }
+        .btn-notify { background: #8b5cf6; } .btn-notify:hover { background: #7c3aed; }
+        .btn-export-pending { background: #334155; } .btn-export-pending:hover { background: #1e293b; }
+        .btn-export-verified { background: var(--info); } .btn-export-verified:hover { background: #2563eb; }
+        .btn-logout { background: var(--danger); } .btn-logout:hover { background: #dc2626; }
+        
+        .card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; transition: background 0.3s; }
+        .card-header { padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 18px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        [data-theme="light"] .card-header { background: #f8fafc; }
+        [data-theme="dark"] .card-header { background: #0f172a; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px 20px; text-align: right; border-bottom: 1px solid var(--border); font-size: 14px; }
+        
+        [data-theme="light"] th { background: white; color: var(--text-light); font-weight: 700; }
+        [data-theme="dark"] th { background: #1e293b; color: var(--text-main); font-weight: 700; }
+        
+        [data-theme="light"] tr:hover { background: #f8fafc; }
+        [data-theme="dark"] tr:hover { background: #0f172a; }
+        
+        .td-actions { display: flex; gap: 10px; }
+        .btn-sm { padding: 6px 12px; border: none; border-radius: 8px; color: white; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-approve { background: var(--success); } .btn-approve:hover { filter: brightness(0.9); }
+        .btn-reject { background: var(--danger); } .btn-reject:hover { filter: brightness(0.9); }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        [data-theme="light"] .badge-approve { background: #ecfdf5; color: var(--success); }
+        [data-theme="dark"] .badge-approve { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        
+        [data-theme="light"] .badge-reject { background: #fef2f2; color: var(--danger); }
+        [data-theme="dark"] .badge-reject { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        
+        #errorMsg { color: var(--danger); font-size: 14px; font-weight: 600; margin-top: 10px; display: none; }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-light); font-weight: 600; }
+        .admin-email { font-size: 12px; color: var(--text-light); margin-right: 15px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div id="loginSection">
+        <h2><i class="fa-solid fa-lock"></i> لوحة الإدارة</h2>
+        <input type="email" id="email" class="input-field" placeholder="البريد الإلكتروني للأدمن">
+        <input type="password" id="password" class="input-field" placeholder="كلمة المرور">
+        <button id="loginBtn" class="btn">تسجيل الدخول</button>
+        <div id="errorMsg">بيانات الدخول غير صحيحة أو غير مصرح لك!</div>
+    </div>
+
+    <div id="dashboardSection">
+        <div class="dash-header">
+            <div>
+                <h2 style="margin: 0; color: var(--text-main);"><i class="fa-solid fa-server"></i> مركز التحكم - BRT</h2>
+                <div class="admin-email" id="currentAdminText"></div>
+            </div>
+            <div class="action-btns">
+                <button class="btn-action btn-notify" onclick="requestNotificationPermission()"><i class="fa-solid fa-bell"></i> الإشعارات</button>
+                <button class="btn-action btn-theme" onclick="toggleTheme()"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+                <button class="btn-action btn-export-pending" onclick="exportCSV('pending')"><i class="fa-solid fa-file-csv"></i> المنتظر</button>
+                <button class="btn-action btn-export-verified" onclick="exportCSV('verified')"><i class="fa-solid fa-file-circle-check"></i> المعتمد</button>
+                <button class="btn-action btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+            </div>
+        </div>
+
+        <!-- 1. المحطات قيد المراجعة -->
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> المحطات قيد المراجعة (Live)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المحطة</th>
+                        <th>المساهم</th>
+                        <th>الإحداثيات</th>
+                        <th>الوقت</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingTableBody">
+                    <tr><td colspan="5" class="empty-state">جاري الاتصال بقاعدة البيانات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2. المحطات المعتمدة (الجدول الجديد للحذف) -->
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-map-location-dot" style="color: var(--success);"></i> المحطات المعتمدة في الخريطة</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المحطة</th>
+                        <th>المساهم</th>
+                        <th>الإحداثيات</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="verifiedTableBody">
+                    <tr><td colspan="4" class="empty-state">جاري تحميل المحطات المعتمدة...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 3. سجل النشاطات -->
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-clock-rotate-left" style="color: var(--info);"></i> سجل نشاطات الإدارة (Audit Log)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>المسؤول (Admin)</th>
+                        <th>الإجراء</th>
+                        <th>المحطة</th>
+                        <th>الوقت</th>
+                    </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                    <tr><td colspan="4" class="empty-state">جاري تحميل السجلات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, addDoc, serverTimestamp, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvLh2xaY82KPf532i4ME__at-jFn2xpZU",
+            authDomain: "brt-egypt.firebaseapp.com",
+            projectId: "brt-egypt",
+            storageBucket: "brt-egypt.firebasestorage.app",
+            messagingSenderId: "956464108001",
+            appId: "1:956464108001:web:f70ba23bccb8070fa702a0",
+            measurementId: "G-7X07B0Q6HE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let pendingStationsData = [];
+        let unsubscribePending = null;
+        let unsubscribeVerified = null;
+        let unsubscribeLogs = null;
+        let isInitialLoad = true;
+
+        let currentTheme = localStorage.getItem('admin_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon();
+
+        window.toggleTheme = function() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('admin_theme', currentTheme);
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateThemeIcon();
+        };
+
+        function updateThemeIcon() {
+            document.getElementById('themeIcon').className = currentTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        window.requestNotificationPermission = function() {
+            if (!("Notification" in window)) alert("متصفحك لا يدعم الإشعارات.");
+            else if (Notification.permission === "granted") alert("الإشعارات مفعلة بالفعل!");
+            else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") alert("تم تفعيل الإشعارات بنجاح!");
+                });
+            } else alert("لقد قمت برفض الإشعارات سابقاً. يرجى تفعيلها من إعدادات المتصفح.");
+        };
+
+        function notifyAdmin(stationName, contributor) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("محطة BRT جديدة! 🚌", {
+                    body: `قام "${contributor}" بإضافة محطة: ${stationName}`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png"
+                });
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { 
+                document.getElementById('loginSection').style.display = 'none'; 
+                document.getElementById('dashboardSection').style.display = 'block';
+                document.getElementById('currentAdminText').innerText = `أهلاً: ${user.email}`;
+                startRealtimeListeners();
+            } 
+            else { 
+                document.getElementById('loginSection').style.display = 'block'; 
+                document.getElementById('dashboardSection').style.display = 'none';
+                stopRealtimeListeners();
+            }
+        });
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const email = document.getElementById('email').value; const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password).then(() => {
+                if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+            }).catch(() => { document.getElementById('errorMsg').style.display = 'block'; });
+        });
+
+        window.logout = function() { signOut(auth); };
+
+        function startRealtimeListeners() {
+            isInitialLoad = true; 
+            
+            // 1. التحديث الفوري للمراجعة
+            unsubscribePending = onSnapshot(collection(db, "pending_stations"), (snapshot) => {
+                if (!isInitialLoad) {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") notifyAdmin(change.doc.data().name, change.doc.data().contributor);
+                    });
+                } else isInitialLoad = false;
+
+                const tbody = document.getElementById('pendingTableBody');
+                tbody.innerHTML = '';
+                pendingStationsData = [];
+                
+                if(snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fa-solid fa-mug-hot"></i> لا توجد محطات جديدة، الخريطة محدثة!</td></tr>'; return; }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    const time = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString('ar-EG') : 'الآن';
+                    const deviceId = data.deviceId || 'unknown';
+                    
+                    pendingStationsData.push({...data, id: id, time: time});
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${data.name}</strong></td>
+                        <td>${data.contributor}</td>
+                        <td dir="ltr">${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}</td>
+                        <td dir="ltr">${time}</td>
+                        <td class="td-actions">
+                            <button class="btn-sm btn-approve" onclick="approveStation('${id}', '${data.name.replace(/'/g, "\\'")}', ${data.lat}, ${data.lng}, '${data.contributor.replace(/'/g, "\\'")}', '${deviceId}')"><i class="fa-solid fa-check"></i> قبول</button>
+                            <button class="btn-sm btn-reject" onclick="rejectStation('${id}', '${data.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-xmark"></i> رفض</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+
+            // 2. التحديث الفوري للمحطات المعتمدة (الجديدة للحذف)
+            unsubscribeVerified = onSnapshot(collection(db, "verified_stations"), (snapshot) => {
+                const tbody = document.getElementById('verifiedTableBody');
+                tbody.innerHTML = '';
+                
+                if(snapshot.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state">لا توجد محطات معتمدة حتى الآن.</td></tr>'; return; }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${data.name}</strong></td>
+                        <td>${data.contributor}</td>
+                        <td dir="ltr">${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}</td>
+                        <td class="td-actions">
+                            <button class="btn-sm btn-reject" onclick="deleteVerifiedStation('${id}', '${data.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash-can"></i> إزالة من الخريطة</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+
+            // 3. التحديث الفوري لسجل النشاطات
+            const logsQuery = query(collection(db, "audit_logs"), orderBy("timestamp", "desc"), limit(30));
+            unsubscribeLogs = onSnapshot(logsQuery, (snapshot) => {
+                const tbody = document.getElementById('logsTableBody');
+                tbody.innerHTML = '';
+                
+                if(snapshot.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state">لا توجد نشاطات مسجلة حتى الآن.</td></tr>'; return; }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const time = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString('ar-EG') : 'الآن';
+                    let badgeClass = 'badge-approve';
+                    if (data.action === 'رفض' || data.action === 'إزالة اعتماد') badgeClass = 'badge-reject';
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td dir="ltr" style="text-align:right;">${data.admin}</td>
+                        <td><span class="badge ${badgeClass}">${data.action}</span></td>
+                        <td>${data.stationName}</td>
+                        <td dir="ltr">${time}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function stopRealtimeListeners() {
+            if(unsubscribePending) unsubscribePending();
+            if(unsubscribeVerified) unsubscribeVerified();
+            if(unsubscribeLogs) unsubscribeLogs();
+        }
+
+        async function logAdminAction(actionType, stationName) {
+            try {
+                await addDoc(collection(db, "audit_logs"), {
+                    admin: auth.currentUser.email,
+                    action: actionType,
+                    stationName: stationName,
+                    timestamp: serverTimestamp()
+                });
+            } catch(e) { console.error("Error logging action", e); }
+        }
+
+        window.approveStation = async function(id, name, lat, lng, contributor, deviceId) {
+            try {
+                await addDoc(collection(db, "verified_stations"), {
+                    name: name, lat: lat, lng: lng, contributor: contributor, deviceId: deviceId
+                });
+                await deleteDoc(doc(db, "pending_stations", id));
+                await logAdminAction('قبول', name);
+            } catch (e) { alert('حدث خطأ أثناء الاعتماد.'); console.error(e); }
+        };
+
+        window.rejectStation = async function(id, name) {
+            if(!confirm(`هل أنت متأكد من رفض محطة: ${name}؟`)) return;
+            try { 
+                await deleteDoc(doc(db, "pending_stations", id)); 
+                await logAdminAction('رفض', name);
+            } catch (e) { alert('حدث خطأ أثناء الحذف.'); }
+        };
+
+        // دالة إزالة المحطة المعتمدة
+        window.deleteVerifiedStation = async function(id, name) {
+            if(!confirm(`هل أنت متأكد من حذف محطة "${name}" المعتمدة نهائياً من الخريطة؟\nسيتم إزالتها من الخريطة العامة ومن نقاط المساهم.`)) return;
+            try { 
+                await deleteDoc(doc(db, "verified_stations", id)); 
+                await logAdminAction('إزالة اعتماد', name);
+            } catch (e) { alert('حدث خطأ أثناء الإزالة.'); }
+        };
+
+        window.exportCSV = async function(type) {
+            let dataToExport = []; let fileName = "";
+            if (type === 'pending') {
+                if(pendingStationsData.length === 0) { alert('لا توجد بيانات منتظرة لتحميلها!'); return; }
+                dataToExport = pendingStationsData; fileName = "BRT_Pending_Stations.csv";
+            } else if (type === 'verified') {
+                const btn = document.querySelector('.btn-export-verified');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...';
+                try {
+                    const snap = await getDocs(collection(db, "verified_stations"));
+                    snap.forEach(doc => { dataToExport.push({...doc.data(), time: 'معتمدة'}); });
+                } catch(e) { alert('خطأ في جلب المعتمد.'); }
+                btn.innerHTML = originalText;
+                if(dataToExport.length === 0) { alert('لا توجد محطات معتمدة حتى الآن!'); return; }
+                fileName = "BRT_Verified_Stations.csv";
+            }
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+            csvContent += "اسم المحطة,المساهم,خط العرض,خط الطول,الوقت/الحالة\n";
+            dataToExport.forEach(row => { csvContent += `${row.name},${row.contributor},${row.lat},${row.lng},${row.time}\n`; });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", fileName);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        };
+    </script>
+</body>
+</html>
