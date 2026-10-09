@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>أتوبيس الدائري | BRT Tracker</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -20,15 +20,24 @@
     <style>
         :root { --bg-color: #f3f6f8; --surface: #ffffff; --primary: #f97316; --primary-hover: #ea580c; --text-main: #1e293b; --text-light: #64748b; --success: #10b981; --border: #e2e8f0; --input-bg: #f8fafc; }
         [data-theme="dark"] { --bg-color: #0f172a; --surface: #1e293b; --text-main: #f8fafc; --text-light: #94a3b8; --border: #334155; --input-bg: #0f172a; }
-        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 20px 10px; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background-color 0.4s ease, color 0.4s ease; }
         
+        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 20px 10px; background-color: transparent !important; color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: color 0.4s ease; }
+        
+        /* خلفية الفيديو */
+        .bg-video { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -2; pointer-events: none; }
+        .video-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.65); z-index: -1; pointer-events: none; }
+
         .top-controls { width: 100%; max-width: 500px; display: flex; justify-content: space-between; margin-bottom: 15px; }
         .controls-group { display: flex; gap: 10px; }
-        .control-btn { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 8px 15px; border-radius: 12px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        
+        .control-btn { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); color: var(--text-main); border: 1px solid var(--border); padding: 8px 15px; border-radius: 12px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+        [data-theme="dark"] .control-btn { background: rgba(30, 41, 59, 0.85); }
         .control-btn:hover { border-color: var(--primary); color: var(--primary); }
         .btn-help { color: var(--primary); border-color: var(--primary); }
 
-        .app-container { background: var(--surface); width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); overflow: hidden; animation: fadeIn 0.8s ease-out; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
+        .app-container { background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); overflow: hidden; animation: fadeIn 0.8s ease-out; border: 1px solid rgba(255, 255, 255, 0.3); }
+        [data-theme="dark"] .app-container { background: rgba(30, 41, 59, 0.85) !important; border-color: rgba(255, 255, 255, 0.1); }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
         .header { padding: 25px 20px 15px; text-align: center; }
@@ -38,13 +47,12 @@
         
         .map-wrapper { padding: 0 20px; position: relative; }
         #map { height: 280px; width: 100%; border-radius: 16px; z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid var(--border); cursor: crosshair; }
-        [data-theme="dark"] .leaflet-layer, [data-theme="dark"] .leaflet-control-zoom-in, [data-theme="dark"] .leaflet-control-zoom-out, [data-theme="dark"] .leaflet-control-attribution { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+        [data-theme="dark"] .leaflet-layer { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         
         .center-marker { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none; transition: transform 0.1s; }
         .center-marker i { font-size: 38px; color: #ef4444; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4)); }
 
         .form-section { padding: 20px; }
-        
         .manual-coords { background: rgba(249, 115, 22, 0.05); border: 1px dashed var(--primary); padding: 12px; border-radius: 12px; margin-bottom: 20px; }
         .coords-note { font-size: 12px; color: var(--text-light); margin: 0 0 10px 0; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .coords-note i { color: var(--primary); }
@@ -56,72 +64,47 @@
         .input-group i { position: absolute; inset-inline-end: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; transition: color 0.3s; }
         input[type="text"] { width: 100%; box-sizing: border-box; padding-block: 14px; padding-inline-start: 15px; padding-inline-end: 40px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; background: var(--input-bg); color: var(--text-main); transition: all 0.3s ease; }
         input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
-        input[type="text"]:focus + i { color: var(--primary); }
         
         button.action-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.25); }
         button.action-btn:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
         button.action-btn:disabled { background: var(--border); color: var(--text-light); cursor: not-allowed; box-shadow: none; transform: none; }
         
-        .security-note { margin-top: 15px; padding: 10px; border-radius: 10px; background: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); font-size: 12px; font-weight: 600; color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; transition: all 0.3s ease; }
+        .security-note { margin-top: 15px; padding: 10px; border-radius: 10px; background: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); font-size: 12px; font-weight: 600; color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
         .security-note i { color: var(--success); font-size: 14px; }
         
         .footer { margin-top: auto; padding: 30px 20px 10px; text-align: center; width: 100%; max-width: 500px; animation: fadeIn 1s ease-out; }
-        .dev-badge { display: inline-block; background: var(--surface); border: 1px solid var(--border); color: var(--text-light); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
-        .dev-name { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
-        .dev-title { font-size: 13px; color: var(--text-light); font-weight: 600; }
+        .dev-badge { display: inline-block; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); border: 1px solid var(--border); color: var(--text-main); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
+        [data-theme="dark"] .dev-badge { background: rgba(30, 41, 59, 0.85); color: white; }
+        .dev-name { font-size: 16px; font-weight: 800; margin-bottom: 2px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .dev-title { font-size: 13px; color: rgba(255,255,255,0.8); font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        
         .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 15px; }
-        .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-main); background: var(--surface); border: 1px solid var(--border); font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
-        .social-btn:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-3px); }
-        .copyright-text { margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-light); direction: ltr; }
+        .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-main); background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border); font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
+        [data-theme="dark"] .social-btn { background: rgba(30, 41, 59, 0.85); color: white; }
+        
+        /* --- تظبيط مقاسات الموبايلات الصغيرة جداً --- */
+        @media (max-width: 480px) {
+            body { padding: 10px 5px; }
+            .header { padding: 20px 15px 10px; }
+            .header h1 { font-size: 20px; }
+            #map { height: 230px; } /* تصغير الخريطة عشان الفورم يظهر كله */
+            .form-section { padding: 15px; }
+            button.action-btn { padding: 14px; font-size: 15px; }
+            .smart-paste-input, input[type="text"] { font-size: 13px; padding-block: 12px; }
+        }
 
-        /* --- تحسينات Intro.js الحديثة والموبايل --- */
-        .introjs-tooltip {
-            font-family: 'Cairo', sans-serif !important;
-            border-radius: 20px !important;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
-            max-width: 90vw !important; /* مناسب لشاشات الموبايل */
-            width: 320px !important;
-            border: none !important;
-            background-color: var(--surface) !important;
-            color: var(--text-main) !important;
-        }
-        .introjs-tooltiptext {
-            font-size: 14px !important;
-            line-height: 1.6 !important;
-            padding: 15px 10px !important;
-        }
-        .introjs-button {
-            font-family: 'Cairo', sans-serif !important;
-            font-weight: 700 !important;
-            border-radius: 10px !important;
-            text-shadow: none !important;
-            padding: 8px 12px !important;
-            border: 1px solid var(--border) !important;
-            background: var(--bg-color) !important;
-            color: var(--text-main) !important;
-            transition: all 0.3s ease !important;
-        }
-        .introjs-button:hover {
-            background: var(--border) !important;
-        }
-        .introjs-nextbutton {
-            background: var(--primary) !important;
-            color: white !important;
-            border-color: var(--primary) !important;
-        }
-        .introjs-nextbutton:hover {
-            background: var(--primary-hover) !important;
-        }
-        .introjs-helperLayer {
-            border-radius: 16px !important;
-            box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 1px 0px, rgba(0, 0, 0, 0.6) 0px 0px 0px 5000px !important;
-        }
-        .introjs-bullets ul li a.active {
-            background: var(--primary) !important;
-        }
+        /* تحسينات Intro.js */
+        .introjs-tooltip { font-family: 'Cairo', sans-serif !important; border-radius: 20px !important; box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important; max-width: 90vw !important; width: 320px !important; border: none !important; background-color: var(--surface) !important; color: var(--text-main) !important; }
+        .introjs-button { font-family: 'Cairo', sans-serif !important; font-weight: 700 !important; border-radius: 10px !important; text-shadow: none !important; padding: 8px 12px !important; border: 1px solid var(--border) !important; background: var(--bg-color) !important; color: var(--text-main) !important; transition: all 0.3s ease !important; }
+        .introjs-nextbutton { background: var(--primary) !important; color: white !important; border-color: var(--primary) !important; }
     </style>
 </head>
 <body>
+
+    <video autoplay loop muted playsinline class="bg-video">
+        <source src="brt-background.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
 
     <div class="top-controls">
         <button class="control-btn btn-help" onclick="startTutorial()"><i class="fa-solid fa-circle-question"></i> <span id="helpText">جولة تعليمية</span></button>

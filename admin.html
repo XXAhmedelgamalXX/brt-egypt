@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لوحة تحكم BRT | Admin</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -22,9 +22,9 @@
             --input-bg: #0f172a;
         }
 
-        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 20px 10px; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
         
-        #loginSection { margin-top: 10vh; background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 90%; max-width: 400px; text-align: center; transition: background 0.3s; }
+        #loginSection { margin-top: 10vh; background: var(--surface); padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; box-sizing: border-box; transition: background 0.3s; }
         #loginSection h2 { margin: 0 0 20px 0; color: var(--text-main); font-weight: 800; }
         
         .input-field { width: 100%; box-sizing: border-box; padding: 15px; margin-bottom: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Cairo', sans-serif; font-size: 15px; background: var(--input-bg); color: var(--text-main); transition: 0.3s; }
@@ -33,25 +33,31 @@
         .btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; transition: 0.3s; }
         .btn:hover { background: #ea580c; }
         
-        #dashboardSection { display: none; width: 95%; max-width: 1200px; margin-top: 30px; margin-bottom: 50px; }
+        #dashboardSection { display: none; width: 100%; max-width: 1200px; margin-top: 10px; margin-bottom: 50px; }
         
-        .dash-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 20px 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; flex-wrap: wrap; gap: 15px; transition: background 0.3s; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; flex-wrap: wrap; gap: 15px; transition: background 0.3s; }
+        .dash-title h2 { margin: 0; font-size: 20px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .admin-email { font-size: 13px; color: var(--text-light); margin-top: 5px; font-weight: 600; }
+        
         .action-btns { display: flex; gap: 10px; flex-wrap: wrap; }
         
-        .btn-action { padding: 10px 15px; border: none; border-radius: 8px; color: white; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-theme { background: #64748b; } .btn-theme:hover { background: #475569; }
+        .btn-action { padding: 10px 15px; border: none; border-radius: 8px; color: white; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; flex: 1; min-width: 120px; }
+        .btn-theme { background: #64748b; min-width: 50px; flex: none; } .btn-theme:hover { background: #475569; }
         .btn-notify { background: #8b5cf6; } .btn-notify:hover { background: #7c3aed; }
         .btn-export-pending { background: #334155; } .btn-export-pending:hover { background: #1e293b; }
         .btn-export-verified { background: var(--info); } .btn-export-verified:hover { background: #2563eb; }
         .btn-logout { background: var(--danger); } .btn-logout:hover { background: #dc2626; }
         
-        .card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; transition: background 0.3s; }
-        .card-header { padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 18px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        .card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 25px; transition: background 0.3s; width: 100%; }
+        .card-header { padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
         [data-theme="light"] .card-header { background: #f8fafc; }
         [data-theme="dark"] .card-header { background: #0f172a; }
         
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px 20px; text-align: right; border-bottom: 1px solid var(--border); font-size: 14px; }
+        /* التعديل الجوهري لظبط الجداول على الموبايل */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 600px; /* بيجبر الجدول ياخد مساحته ويسكرول على الموبايل */ }
+        th, td { padding: 12px 15px; text-align: right; border-bottom: 1px solid var(--border); font-size: 13px; white-space: nowrap; }
         
         [data-theme="light"] th { background: white; color: var(--text-light); font-weight: 700; }
         [data-theme="dark"] th { background: #1e293b; color: var(--text-main); font-weight: 700; }
@@ -59,21 +65,30 @@
         [data-theme="light"] tr:hover { background: #f8fafc; }
         [data-theme="dark"] tr:hover { background: #0f172a; }
         
-        .td-actions { display: flex; gap: 10px; }
-        .btn-sm { padding: 6px 12px; border: none; border-radius: 8px; color: white; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .td-actions { display: flex; gap: 8px; }
+        .btn-sm { padding: 6px 10px; border: none; border-radius: 8px; color: white; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
         .btn-approve { background: var(--success); } .btn-approve:hover { filter: brightness(0.9); }
         .btn-reject { background: var(--danger); } .btn-reject:hover { filter: brightness(0.9); }
         
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
         [data-theme="light"] .badge-approve { background: #ecfdf5; color: var(--success); }
         [data-theme="dark"] .badge-approve { background: rgba(16, 185, 129, 0.2); color: #34d399; }
         
         [data-theme="light"] .badge-reject { background: #fef2f2; color: var(--danger); }
         [data-theme="dark"] .badge-reject { background: rgba(239, 68, 68, 0.2); color: #f87171; }
         
-        #errorMsg { color: var(--danger); font-size: 14px; font-weight: 600; margin-top: 10px; display: none; }
-        .empty-state { text-align: center; padding: 40px; color: var(--text-light); font-weight: 600; }
-        .admin-email { font-size: 12px; color: var(--text-light); margin-right: 15px; font-weight: 600; }
+        #errorMsg { color: var(--danger); font-size: 13px; font-weight: 600; margin-top: 10px; display: none; }
+        .empty-state { text-align: center; padding: 30px; color: var(--text-light); font-weight: 600; }
+        
+        /* تظبيطات الشاشات الصغيرة للموبايل */
+        @media (max-width: 768px) {
+            .dash-header { flex-direction: column; align-items: flex-start; }
+            .action-btns { width: 100%; }
+        }
+        @media (max-width: 480px) {
+            .btn-action { min-width: calc(50% - 5px); }
+            .btn-theme { min-width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -88,13 +103,13 @@
 
     <div id="dashboardSection">
         <div class="dash-header">
-            <div>
-                <h2 style="margin: 0; color: var(--text-main);"><i class="fa-solid fa-server"></i> مركز التحكم - BRT</h2>
+            <div class="dash-title">
+                <h2><i class="fa-solid fa-server"></i> مركز التحكم - BRT</h2>
                 <div class="admin-email" id="currentAdminText"></div>
             </div>
             <div class="action-btns">
-                <button class="btn-action btn-notify" onclick="requestNotificationPermission()"><i class="fa-solid fa-bell"></i> الإشعارات</button>
                 <button class="btn-action btn-theme" onclick="toggleTheme()"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+                <button class="btn-action btn-notify" onclick="requestNotificationPermission()"><i class="fa-solid fa-bell"></i> الإشعارات</button>
                 <button class="btn-action btn-export-pending" onclick="exportCSV('pending')"><i class="fa-solid fa-file-csv"></i> المنتظر</button>
                 <button class="btn-action btn-export-verified" onclick="exportCSV('verified')"><i class="fa-solid fa-file-circle-check"></i> المعتمد</button>
                 <button class="btn-action btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
@@ -104,56 +119,62 @@
         <!-- 1. المحطات قيد المراجعة -->
         <div class="card">
             <div class="card-header"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> المحطات قيد المراجعة (Live)</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>اسم المحطة</th>
-                        <th>المساهم</th>
-                        <th>الإحداثيات</th>
-                        <th>الوقت</th>
-                        <th>إجراء</th>
-                    </tr>
-                </thead>
-                <tbody id="pendingTableBody">
-                    <tr><td colspan="5" class="empty-state">جاري الاتصال بقاعدة البيانات...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم المحطة</th>
+                            <th>المساهم</th>
+                            <th>الإحداثيات</th>
+                            <th>الوقت</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <tr><td colspan="5" class="empty-state">جاري الاتصال بقاعدة البيانات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- 2. المحطات المعتمدة (الجدول الجديد للحذف) -->
+        <!-- 2. المحطات المعتمدة -->
         <div class="card">
             <div class="card-header"><i class="fa-solid fa-map-location-dot" style="color: var(--success);"></i> المحطات المعتمدة في الخريطة</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>اسم المحطة</th>
-                        <th>المساهم</th>
-                        <th>الإحداثيات</th>
-                        <th>إجراء</th>
-                    </tr>
-                </thead>
-                <tbody id="verifiedTableBody">
-                    <tr><td colspan="4" class="empty-state">جاري تحميل المحطات المعتمدة...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم المحطة</th>
+                            <th>المساهم</th>
+                            <th>الإحداثيات</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="verifiedTableBody">
+                        <tr><td colspan="4" class="empty-state">جاري تحميل المحطات المعتمدة...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- 3. سجل النشاطات -->
         <div class="card">
             <div class="card-header"><i class="fa-solid fa-clock-rotate-left" style="color: var(--info);"></i> سجل نشاطات الإدارة (Audit Log)</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>المسؤول (Admin)</th>
-                        <th>الإجراء</th>
-                        <th>المحطة</th>
-                        <th>الوقت</th>
-                    </tr>
-                </thead>
-                <tbody id="logsTableBody">
-                    <tr><td colspan="4" class="empty-state">جاري تحميل السجلات...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المسؤول (Admin)</th>
+                            <th>الإجراء</th>
+                            <th>المحطة</th>
+                            <th>الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr><td colspan="4" class="empty-state">جاري تحميل السجلات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -182,19 +203,19 @@
         let unsubscribeLogs = null;
         let isInitialLoad = true;
 
-        let currentTheme = localStorage.getItem('admin_theme') || 'light';
+        const currentTheme = localStorage.getItem('admin_theme') || 'light';
         document.documentElement.setAttribute('data-theme', currentTheme);
-        updateThemeIcon();
+        updateThemeIcon(currentTheme);
 
         window.toggleTheme = function() {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('admin_theme', currentTheme);
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            updateThemeIcon();
+            let newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            localStorage.setItem('admin_theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            updateThemeIcon(newTheme);
         };
 
-        function updateThemeIcon() {
-            document.getElementById('themeIcon').className = currentTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        function updateThemeIcon(theme) {
+            document.getElementById('themeIcon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
 
         window.requestNotificationPermission = function() {
@@ -242,7 +263,6 @@
         function startRealtimeListeners() {
             isInitialLoad = true; 
             
-            // 1. التحديث الفوري للمراجعة
             unsubscribePending = onSnapshot(collection(db, "pending_stations"), (snapshot) => {
                 if (!isInitialLoad) {
                     snapshot.docChanges().forEach((change) => {
@@ -279,7 +299,6 @@
                 });
             });
 
-            // 2. التحديث الفوري للمحطات المعتمدة (الجديدة للحذف)
             unsubscribeVerified = onSnapshot(collection(db, "verified_stations"), (snapshot) => {
                 const tbody = document.getElementById('verifiedTableBody');
                 tbody.innerHTML = '';
@@ -296,14 +315,13 @@
                         <td>${data.contributor}</td>
                         <td dir="ltr">${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}</td>
                         <td class="td-actions">
-                            <button class="btn-sm btn-reject" onclick="deleteVerifiedStation('${id}', '${data.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash-can"></i> إزالة من الخريطة</button>
+                            <button class="btn-sm btn-reject" onclick="deleteVerifiedStation('${id}', '${data.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash-can"></i> إزالة</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             });
 
-            // 3. التحديث الفوري لسجل النشاطات
             const logsQuery = query(collection(db, "audit_logs"), orderBy("timestamp", "desc"), limit(30));
             unsubscribeLogs = onSnapshot(logsQuery, (snapshot) => {
                 const tbody = document.getElementById('logsTableBody');
@@ -343,7 +361,7 @@
                     stationName: stationName,
                     timestamp: serverTimestamp()
                 });
-            } catch(e) { console.error("Error logging action", e); }
+            } catch(e) {}
         }
 
         window.approveStation = async function(id, name, lat, lng, contributor, deviceId) {
@@ -353,7 +371,7 @@
                 });
                 await deleteDoc(doc(db, "pending_stations", id));
                 await logAdminAction('قبول', name);
-            } catch (e) { alert('حدث خطأ أثناء الاعتماد.'); console.error(e); }
+            } catch (e) { alert('حدث خطأ أثناء الاعتماد.'); }
         };
 
         window.rejectStation = async function(id, name) {
@@ -364,9 +382,8 @@
             } catch (e) { alert('حدث خطأ أثناء الحذف.'); }
         };
 
-        // دالة إزالة المحطة المعتمدة
         window.deleteVerifiedStation = async function(id, name) {
-            if(!confirm(`هل أنت متأكد من حذف محطة "${name}" المعتمدة نهائياً من الخريطة؟\nسيتم إزالتها من الخريطة العامة ومن نقاط المساهم.`)) return;
+            if(!confirm(`هل أنت متأكد من حذف محطة "${name}" المعتمدة نهائياً؟`)) return;
             try { 
                 await deleteDoc(doc(db, "verified_stations", id)); 
                 await logAdminAction('إزالة اعتماد', name);
@@ -376,19 +393,19 @@
         window.exportCSV = async function(type) {
             let dataToExport = []; let fileName = "";
             if (type === 'pending') {
-                if(pendingStationsData.length === 0) { alert('لا توجد بيانات منتظرة لتحميلها!'); return; }
-                dataToExport = pendingStationsData; fileName = "BRT_Pending_Stations.csv";
+                if(pendingStationsData.length === 0) { alert('لا توجد بيانات منتظرة!'); return; }
+                dataToExport = pendingStationsData; fileName = "BRT_Pending.csv";
             } else if (type === 'verified') {
                 const btn = document.querySelector('.btn-export-verified');
                 const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...';
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحميل...';
                 try {
                     const snap = await getDocs(collection(db, "verified_stations"));
                     snap.forEach(doc => { dataToExport.push({...doc.data(), time: 'معتمدة'}); });
-                } catch(e) { alert('خطأ في جلب المعتمد.'); }
+                } catch(e) { alert('خطأ في التحميل.'); }
                 btn.innerHTML = originalText;
-                if(dataToExport.length === 0) { alert('لا توجد محطات معتمدة حتى الآن!'); return; }
-                fileName = "BRT_Verified_Stations.csv";
+                if(dataToExport.length === 0) { alert('لا توجد محطات!'); return; }
+                fileName = "BRT_Verified.csv";
             }
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
             csvContent += "اسم المحطة,المساهم,خط العرض,خط الطول,الوقت/الحالة\n";
