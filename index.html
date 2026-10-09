@@ -7,37 +7,64 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Intro.js for Tutorial -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs-rtl.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
     
     <style>
         :root { --bg-color: #f3f6f8; --surface: #ffffff; --primary: #f97316; --primary-hover: #ea580c; --text-main: #1e293b; --text-light: #64748b; --success: #10b981; --border: #e2e8f0; --input-bg: #f8fafc; }
         [data-theme="dark"] { --bg-color: #0f172a; --surface: #1e293b; --text-main: #f8fafc; --text-light: #94a3b8; --border: #334155; --input-bg: #0f172a; }
         body { font-family: 'Cairo', sans-serif; margin: 0; padding: 20px 10px; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background-color 0.4s ease, color 0.4s ease; }
-        .top-controls { width: 100%; max-width: 500px; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; }
+        
+        .top-controls { width: 100%; max-width: 500px; display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .controls-group { display: flex; gap: 10px; }
         .control-btn { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 8px 15px; border-radius: 12px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
         .control-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-help { color: var(--primary); border-color: var(--primary); }
+
         .app-container { background: var(--surface); width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); overflow: hidden; animation: fadeIn 0.8s ease-out; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         .header { padding: 25px 20px 15px; text-align: center; }
         .header h1 { margin: 0; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .header h1 i { color: var(--primary); }
         .header p { margin: 5px 0 0; font-size: 14px; color: var(--text-light); }
-        .map-wrapper { padding: 0 20px; }
-        #map { height: 280px; width: 100%; border-radius: 16px; z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid var(--border); }
+        
+        .map-wrapper { padding: 0 20px; position: relative; }
+        #map { height: 280px; width: 100%; border-radius: 16px; z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid var(--border); cursor: crosshair; }
         [data-theme="dark"] .leaflet-layer, [data-theme="dark"] .leaflet-control-zoom-in, [data-theme="dark"] .leaflet-control-zoom-out, [data-theme="dark"] .leaflet-control-attribution { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+        
+        .center-marker { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none; transition: transform 0.1s; }
+        .center-marker i { font-size: 38px; color: #ef4444; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4)); }
+
         .form-section { padding: 20px; }
-        .status-badge { display: flex; align-items: center; gap: 10px; background: var(--bg-color); padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 20px; border: 1px solid var(--border); transition: all 0.4s ease; }
+        
+        .manual-coords { background: rgba(249, 115, 22, 0.05); border: 1px dashed var(--primary); padding: 12px; border-radius: 12px; margin-bottom: 20px; }
+        .coords-note { font-size: 12px; color: var(--text-light); margin: 0 0 10px 0; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .coords-note i { color: var(--primary); }
+        
+        .smart-paste-input { width: 100%; padding: 12px; font-size: 13px; text-align: left; direction: ltr; border: 2px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text-main); font-weight: 700; font-family: monospace; transition: border-color 0.3s; box-sizing: border-box; }
+        .smart-paste-input:focus { outline: none; border-color: var(--primary); }
+
         .input-group { margin-bottom: 15px; position: relative; }
         .input-group i { position: absolute; inset-inline-end: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; transition: color 0.3s; }
-        input { width: 100%; box-sizing: border-box; padding-block: 14px; padding-inline-start: 15px; padding-inline-end: 40px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; background: var(--input-bg); color: var(--text-main); transition: all 0.3s ease; }
-        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
-        input:focus + i { color: var(--primary); }
+        input[type="text"] { width: 100%; box-sizing: border-box; padding-block: 14px; padding-inline-start: 15px; padding-inline-end: 40px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; background: var(--input-bg); color: var(--text-main); transition: all 0.3s ease; }
+        input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+        input[type="text"]:focus + i { color: var(--primary); }
+        
         button.action-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.25); }
         button.action-btn:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
         button.action-btn:disabled { background: var(--border); color: var(--text-light); cursor: not-allowed; box-shadow: none; transform: none; }
+        
         .security-note { margin-top: 15px; padding: 10px; border-radius: 10px; background: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); font-size: 12px; font-weight: 600; color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; transition: all 0.3s ease; }
         .security-note i { color: var(--success); font-size: 14px; }
+        
         .footer { margin-top: auto; padding: 30px 20px 10px; text-align: center; width: 100%; max-width: 500px; animation: fadeIn 1s ease-out; }
         .dev-badge { display: inline-block; background: var(--surface); border: 1px solid var(--border); color: var(--text-light); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
         .dev-name { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
@@ -46,13 +73,62 @@
         .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-main); background: var(--surface); border: 1px solid var(--border); font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
         .social-btn:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-3px); }
         .copyright-text { margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-light); direction: ltr; }
+
+        /* --- تحسينات Intro.js الحديثة والموبايل --- */
+        .introjs-tooltip {
+            font-family: 'Cairo', sans-serif !important;
+            border-radius: 20px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+            max-width: 90vw !important; /* مناسب لشاشات الموبايل */
+            width: 320px !important;
+            border: none !important;
+            background-color: var(--surface) !important;
+            color: var(--text-main) !important;
+        }
+        .introjs-tooltiptext {
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+            padding: 15px 10px !important;
+        }
+        .introjs-button {
+            font-family: 'Cairo', sans-serif !important;
+            font-weight: 700 !important;
+            border-radius: 10px !important;
+            text-shadow: none !important;
+            padding: 8px 12px !important;
+            border: 1px solid var(--border) !important;
+            background: var(--bg-color) !important;
+            color: var(--text-main) !important;
+            transition: all 0.3s ease !important;
+        }
+        .introjs-button:hover {
+            background: var(--border) !important;
+        }
+        .introjs-nextbutton {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
+        }
+        .introjs-nextbutton:hover {
+            background: var(--primary-hover) !important;
+        }
+        .introjs-helperLayer {
+            border-radius: 16px !important;
+            box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 1px 0px, rgba(0, 0, 0, 0.6) 0px 0px 0px 5000px !important;
+        }
+        .introjs-bullets ul li a.active {
+            background: var(--primary) !important;
+        }
     </style>
 </head>
 <body>
 
     <div class="top-controls">
-        <button id="themeToggleBtn" class="control-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
-        <button id="langToggleBtn" class="control-btn" onclick="toggleLang()">EN</button>
+        <button class="control-btn btn-help" onclick="startTutorial()"><i class="fa-solid fa-circle-question"></i> <span id="helpText">جولة تعليمية</span></button>
+        <div class="controls-group">
+            <button id="themeToggleBtn" class="control-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
+            <button id="langToggleBtn" class="control-btn" onclick="toggleLang()">EN</button>
+        </div>
     </div>
 
     <div class="app-container">
@@ -61,31 +137,35 @@
             <p id="appDesc">شارك في رسم وتوثيق محطات الطريق الدائري</p>
         </div>
 
-        <div class="map-wrapper"><div id="map"></div></div>
+        <div class="map-wrapper" id="tour-map">
+            <div id="map"></div>
+            <div class="center-marker" id="centerMarker"><i class="fa-solid fa-location-dot"></i></div>
+        </div>
 
         <div class="form-section">
-            <div id="statusBadge" class="status-badge">
-                <i id="statusIcon" class="fa-solid fa-satellite-dish fa-beat-fade"></i>
-                <span id="statusText">جاري الاتصال بـ GPS...</span>
+            
+            <div class="manual-coords" id="tour-coords">
+                <p class="coords-note" id="coordsNote"><i class="fa-solid fa-lightbulb"></i> اسحب الخريطة لضبط الدبوس، أو الصق الإحداثيات معاً.</p>
+                <input type="text" id="pastedCoords" class="smart-paste-input" oninput="parseCoordinates(this.value)">
             </div>
 
-            <div class="input-group">
-                <input type="text" id="stationName" disabled>
+            <div class="input-group" id="tour-name">
+                <input type="text" id="stationName">
                 <i class="fa-solid fa-location-dot"></i>
             </div>
 
-            <div class="input-group">
-                <input type="text" id="contributorName" disabled>
+            <div class="input-group" id="tour-user">
+                <input type="text" id="contributorName">
                 <i class="fa-solid fa-user"></i>
             </div>
 
-            <button id="submitBtn" class="action-btn" onclick="sendData()" disabled>
+            <button id="submitBtn" class="action-btn" onclick="sendData()" data-step-id="tour-submit">
                 <i class="fa-solid fa-cloud-arrow-up"></i> <span id="btnText">حفظ بيانات المحطة</span>
             </button>
 
             <div class="security-note">
                 <i class="fa-solid fa-shield-halved"></i>
-                <span id="securityText">ملاحظة أمنية: يتم استخدام موقعك فقط لحظة التوثيق، ولا يتم تتبع مسارك.</span>
+                <span id="securityText">ملاحظة أمنية: تأكد من دقة الإحداثيات قبل الإرسال.</span>
             </div>
         </div>
     </div>
@@ -93,7 +173,6 @@
     <div class="footer">
         <div class="dev-badge" id="devBadge">تم التطوير بواسطة</div>
         
-        <!-- الباب السري للأدمن اللي عملناه -->
         <div class="dev-name" id="secretDoor" style="cursor: pointer; user-select: none;">Ahmed Al-Gamal</div>
         <div class="dev-title" id="devTitle">طالب علوم حاسب وأمن سيبراني</div>
         
@@ -124,15 +203,13 @@
         const db = getFirestore(app);
         const currentYear = new Date().getFullYear();
 
-        // --- نظام تعدد اللغات ---
         const dict = {
-            ar: { title: "مسار الـ BRT", desc: "شارك في رسم وتوثيق محطات الطريق الدائري", statusWaiting: "جاري الاتصال بـ GPS...", stationPh: "اسم المحطة (مثال: تقاطع السويس)", namePh: "اسمك لـ لوحة الشرف (اختياري)", btnText: "حفظ بيانات المحطة", securityMsg: "ملاحظة أمنية: يتم استخدام موقعك فقط لحظة التوثيق، ولا يتم تتبع مسارك.", devBadge: "تم التطوير بواسطة", devTitle: "طالب علوم حاسب وأمن سيبراني", copyrightText: `جميع الحقوق محفوظة © ${currentYear}`, gpsSuccess: "تم تحديد موقعك بدقة", gpsFail: "يرجى تفعيل الـ GPS لتحديد موقعك", noGps: "متصفحك لا يدعم الـ GPS", errInput: "يرجى إدخال اسم المحطة أولاً.", saving: "جاري الحفظ...", saved: "تم الحفظ بنجاح", errServer: "حدث خطأ أثناء الحفظ" },
-            en: { title: "BRT Tracker", desc: "Contribute to mapping the Ring Road stations", statusWaiting: "Connecting to GPS...", stationPh: "Station Name (e.g. Suez Road)", namePh: "Your Name for Leaderboard (Optional)", btnText: "Save Station Data", securityMsg: "Security Note: Location is only accessed upon saving. No background tracking.", devBadge: "DEVELOPED BY", devTitle: "CS & Cybersecurity Student", copyrightText: `All Rights Reserved © ${currentYear}`, gpsSuccess: "Location detected accurately", gpsFail: "Please enable GPS to find location", noGps: "Your browser does not support GPS", errInput: "Please enter a station name first.", saving: "Saving Data...", saved: "Saved Successfully", errServer: "Error occurred while saving" }
+            ar: { title: "مسار الـ BRT", desc: "شارك في رسم وتوثيق محطات الطريق الدائري", coordsNote: "اسحب الخريطة لضبط الدبوس، أو الصق الإحداثيات.", coordsPh: "الصق اللوكيشن هنا (مثال: 30.044, 31.235)", stationPh: "اسم المحطة (مثال: تقاطع السويس)", namePh: "اسمك لـ لوحة الشرف (اختياري)", btnText: "حفظ بيانات المحطة", securityMsg: "ملاحظة أمنية: تأكد من دقة الإحداثيات قبل الإرسال.", devBadge: "تم التطوير بواسطة", devTitle: "طالب علوم حاسب وأمن سيبراني", copyrightText: `جميع الحقوق محفوظة © ${currentYear}`, errInput: "يرجى إدخال اسم المحطة أولاً.", saving: "جاري الحفظ...", saved: "تم الحفظ بنجاح", errServer: "حدث خطأ أثناء الحفظ", helpText: "مساعدة" },
+            en: { title: "BRT Tracker", desc: "Help map the new Ring Road BRT stations", coordsNote: "Drag the map or paste coordinates directly.", coordsPh: "Paste location here (e.g., 30.04, 31.23)", stationPh: "Station Name (e.g., Suez Road)", namePh: "Leaderboard Name (Optional)", btnText: "Save Station Data", securityMsg: "Note: Ensure the pin is accurately placed before saving.", devBadge: "DEVELOPED BY", devTitle: "CS & Cybersecurity Student", copyrightText: `All Rights Reserved © ${currentYear}`, errInput: "Please enter the station name.", saving: "Saving Data...", saved: "Saved Successfully", errServer: "Error occurred while saving", helpText: "Tutorial" }
         };
 
         let currentLang = localStorage.getItem('lang') || 'ar';
         let currentTheme = localStorage.getItem('theme') || 'light';
-        let isGpsReady = false;
 
         window.toggleTheme = function() { currentTheme = currentTheme === 'light' ? 'dark' : 'light'; localStorage.setItem('theme', currentTheme); applySettings(); };
         window.toggleLang = function() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; localStorage.setItem('lang', currentLang); applySettings(); };
@@ -143,8 +220,11 @@
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.documentElement.lang = currentLang;
             document.getElementById('langToggleBtn').innerText = currentLang === 'ar' ? 'EN' : 'عربي';
+            document.getElementById('helpText').innerText = dict[currentLang].helpText;
             document.getElementById('appTitle').innerText = dict[currentLang].title;
             document.getElementById('appDesc').innerText = dict[currentLang].desc;
+            document.getElementById('coordsNote').innerHTML = `<i class="fa-solid fa-lightbulb"></i> ${dict[currentLang].coordsNote}`;
+            document.getElementById('pastedCoords').placeholder = dict[currentLang].coordsPh;
             document.getElementById('stationName').placeholder = dict[currentLang].stationPh;
             document.getElementById('contributorName').placeholder = dict[currentLang].namePh;
             document.getElementById('btnText').innerText = dict[currentLang].btnText;
@@ -152,61 +232,76 @@
             document.getElementById('devBadge').innerText = dict[currentLang].devBadge;
             document.getElementById('devTitle').innerText = dict[currentLang].devTitle;
             document.getElementById('copyrightText').innerText = dict[currentLang].copyrightText;
-            if(document.getElementById('submitBtn').disabled && !isGpsReady) { document.getElementById('statusText').innerText = dict[currentLang].statusWaiting; } else if (isGpsReady) { document.getElementById('statusText').innerText = dict[currentLang].gpsSuccess; }
         }
         applySettings();
 
-        // --- نظام البصمة السرية والذاكرة التلقائية ---
         let myDeviceId = localStorage.getItem('brt_device_id');
-        if (!myDeviceId) {
-            myDeviceId = 'user_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('brt_device_id', myDeviceId);
-        }
-
+        if (!myDeviceId) { myDeviceId = 'user_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('brt_device_id', myDeviceId); }
         let savedName = localStorage.getItem('brt_user_name');
-        if (savedName) {
-            document.getElementById('contributorName').value = savedName;
-        }
+        if (savedName) document.getElementById('contributorName').value = savedName;
 
-        // --- تهيئة الخريطة ---
-        let userLat = 0, userLng = 0;
-        let map = L.map('map', { zoomControl: false }).setView([30.0444, 31.2357], 11);
+        let userLat = 30.0444, userLng = 31.2357; 
+        let map = L.map('map', { zoomControl: false }).setView([userLat, userLng], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSMap' }).addTo(map);
+
+        map.on('move', function () {
+            const center = map.getCenter();
+            userLat = center.lat;
+            userLng = center.lng;
+            document.getElementById('pastedCoords').value = `${userLat.toFixed(6)}, ${userLng.toFixed(6)}`;
+            document.getElementById('centerMarker').style.transform = 'translate(-50%, -110%)';
+        });
+
+        map.on('moveend', function () { document.getElementById('centerMarker').style.transform = 'translate(-50%, -100%)'; });
+
+        window.parseCoordinates = function(val) {
+            const matches = val.match(/-?\d+\.\d+/g);
+            if (matches && matches.length >= 2) {
+                const parsedLat = parseFloat(matches[0]);
+                const parsedLng = parseFloat(matches[1]);
+                
+                if(parsedLat >= -90 && parsedLat <= 90 && parsedLng >= -180 && parsedLng <= 180) {
+                    userLat = parsedLat;
+                    userLng = parsedLng;
+                    map.flyTo([userLat, userLng], 16, { animate: true, duration: 1.5 });
+                    document.getElementById('pastedCoords').style.borderColor = 'var(--success)';
+                }
+            } else {
+                document.getElementById('pastedCoords').style.borderColor = 'var(--border)';
+            }
+        };
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
-                userLat = position.coords.latitude; userLng = position.coords.longitude; isGpsReady = true;
-                setTimeout(() => { map.invalidateSize(); }, 100);
-                map.flyTo([userLat, userLng], 16, { animate: true, duration: 2 });
-                L.marker([userLat, userLng]).addTo(map);
-                const badge = document.getElementById('statusBadge');
-                badge.style.borderColor = 'var(--success)';
-                document.getElementById('statusIcon').className = "fa-solid fa-circle-check";
-                document.getElementById('statusIcon').style.color = "var(--success)";
-                document.getElementById('statusText').innerText = dict[currentLang].gpsSuccess;
-                document.getElementById('stationName').disabled = false;
-                document.getElementById('contributorName').disabled = false;
-                document.getElementById('submitBtn').disabled = false;
-            }, error => {
-                document.getElementById('statusIcon').className = "fa-solid fa-triangle-exclamation";
-                document.getElementById('statusIcon').style.color = "#ef4444";
-                document.getElementById('statusText').innerText = dict[currentLang].gpsFail;
-            }, { enableHighAccuracy: true });
-        } else {
-            document.getElementById('statusText').innerText = dict[currentLang].noGps;
+                map.flyTo([position.coords.latitude, position.coords.longitude], 15, { animate: true, duration: 2 });
+            }, () => {});
         }
 
-        // --- إرسال البيانات ---
+        window.startTutorial = function() {
+            introJs().setOptions({
+                nextLabel: currentLang === 'ar' ? 'التالي' : 'Next', prevLabel: currentLang === 'ar' ? 'السابق' : 'Back', 
+                doneLabel: currentLang === 'ar' ? 'فهمت، يلا نبدأ' : 'Got it!', skipLabel: currentLang === 'ar' ? 'تخطي' : 'Skip',
+                showStepNumbers: true, rtl: currentLang === 'ar',
+                steps: [
+                    { intro: currentLang === 'ar' ? "👋 <b>أهلاً بك!</b><br>في ثواني هنشرحلك إزاي تضيف محطة الدائري." : "👋 <b>Welcome!</b><br>Let's quickly show you how to add a BRT station." },
+                    { element: document.querySelector('#tour-map'), intro: currentLang === 'ar' ? "📍 <b>حرك الخريطة:</b> اسحب الخريطة لحد ما الدبوس الأحمر يقف فوق المحطة بالظبط." : "📍 <b>Move the Map:</b> Drag the map until the red pin points exactly at the station." },
+                    { element: document.querySelector('#tour-coords'), intro: currentLang === 'ar' ? "🌐 <b>لصق الإحداثيات:</b> لو معاك اللوكيشن من جوجل ماب، انسخه والزقه هنا والخريطة هتروحله فوراً." : "🌐 <b>Smart Paste:</b> Have a Google Maps link or coordinates? Paste them here, and the map will auto-adjust!" },
+                    { element: document.querySelector('#tour-name'), intro: currentLang === 'ar' ? "✍️ <b>اسم المحطة:</b> اكتب اسم المحطة هنا (مثال: محطة عدلي منصور)." : "✍️ <b>Station Name:</b> Enter the station's name here (e.g., Adly Mansour)." },
+                    { element: document.querySelector('#tour-user'), intro: currentLang === 'ar' ? "🏆 <b>اسمك للوحة الشرف:</b> اكتب اسمك عشان يظهر في قائمة أفضل المساهمين." : "🏆 <b>Leaderboard Name:</b> Add your name to collect points on the contributor leaderboard." },
+                    { element: document.querySelector('#submitBtn'), intro: currentLang === 'ar' ? "☁️ <b>رفع البيانات:</b> اضغط هنا عشان تحفظ المحطة والإدارة تراجعها." : "☁️ <b>Submit:</b> Click here to save the station for admin review." }
+                ]
+            }).start();
+        };
+
+        if (!localStorage.getItem('brt_tour_done')) { setTimeout(() => { startTutorial(); localStorage.setItem('brt_tour_done', 'true'); }, 1000); }
+
         window.sendData = async function() {
             const stationName = document.getElementById('stationName').value.trim();
             const contributorName = document.getElementById('contributorName').value.trim() || "مساهم مجهول";
 
             if (!stationName) { alert(dict[currentLang].errInput); document.getElementById('stationName').focus(); return; }
 
-            // حفظ الاسم في المتصفح عشان المرة الجاية
-            if (contributorName !== "مساهم مجهول") {
-                localStorage.setItem('brt_user_name', contributorName);
-            }
+            if (contributorName !== "مساهم مجهول") { localStorage.setItem('brt_user_name', contributorName); }
 
             const btn = document.getElementById('submitBtn');
             const originalHTML = btn.innerHTML;
@@ -215,13 +310,8 @@
 
             try {
                 await addDoc(collection(db, "pending_stations"), {
-                    name: stationName,
-                    contributor: contributorName,
-                    deviceId: myDeviceId, // البصمة السرية اللي هتمنع التكرار
-                    lat: userLat,
-                    lng: userLng,
-                    status: "pending",
-                    timestamp: serverTimestamp()
+                    name: stationName, contributor: contributorName, deviceId: myDeviceId, 
+                    lat: userLat, lng: userLng, status: "pending", timestamp: serverTimestamp()
                 });
                 
                 btn.style.background = "var(--success)";
@@ -236,12 +326,9 @@
             }
         };
 
-        // سكريبت الباب السري للأدمن 
-        let clickCount = 0;
-        let clickTimer;
+        let clickCount = 0; let clickTimer;
         document.getElementById('secretDoor').addEventListener('click', function() {
-            clickCount++;
-            clearTimeout(clickTimer);
+            clickCount++; clearTimeout(clickTimer);
             if (clickCount === 5) { window.location.href = 'admin.html'; }
             clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
         });
